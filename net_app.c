@@ -25,15 +25,7 @@ static const char *TAG = "net_app";
 
 #define ETHERNET_ON 1
 
-typedef struct{
-    ip4_addr_t ip;
-    ip4_addr_t nm;
-    ip4_addr_t gw;
-    ip4_addr_t dns1;
-    ip4_addr_t dns2;
-    ip4_addr_t dns3;
-    uint8_t dhcp_on;
-}app_ip_config_t;
+
 
 
 #if ETHERNET_ON == 0
@@ -117,7 +109,7 @@ static void got_ip_event_handler(void *arg, esp_event_base_t event_base,
 esp_eth_phy_t *esp_eth_phy_new_lan8742a(const eth_phy_config_t *config);
 #endif /* ETHERNET_ON == 0 */
 
-int app_net_ini(){
+int app_net_ini(app_ip_config_t* ipcfg){
 	
 	main_event_group = xEventGroupCreate();
     mbClean(mbCONNECTED);
@@ -149,18 +141,7 @@ int app_net_ini(){
 #else /* ETHERNET_ON == 0 */
 
     tcpip_adapter_init();
-	/* Test IP config setup - yor may use NVS for save/load this structure */
-	app_ip_config_t* ipcfg = (app_ip_config_t*)malloc(sizeof(app_ip_config_t));
-	ip4addr_aton("192.168.1.100",&ipcfg->ip);
-	ip4addr_aton("192.168.1.255",&ipcfg->nm);
-	ip4addr_aton("192.168.1.1",&ipcfg->gw);
-	ip4addr_aton("8.8.8.8",&ipcfg->dns1);
-	ip4addr_aton("8.8.4.4",&ipcfg->dns2);
-	ip4addr_aton("195.239.36.27",&ipcfg->dns3);
-	ipcfg->dhcp_on=1;
 	
-	
-    app_ip_config_t* ipcfg = archive_get_ip_cfg();
     if(ipcfg->dhcp_on==0){
 
         int ret = tcpip_adapter_dhcpc_stop(TCPIP_ADAPTER_IF_ETH);
@@ -227,8 +208,7 @@ int app_net_ini(){
     esp_eth_handle_t eth_handle = NULL;
     ESP_ERROR_CHECK(esp_eth_driver_install(&config, &eth_handle));
     ESP_ERROR_CHECK(esp_eth_start(eth_handle));
-	
-	free(ipcfg);
+
 #endif /* ETHERNET_ON == 0 */
 
     return ESP_OK;
