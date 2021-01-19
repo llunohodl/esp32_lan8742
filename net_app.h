@@ -1,6 +1,7 @@
 #ifndef APP_NET_H_
 #define APP_NET_H_
 
+#include <stdint.h>
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
 #include "freertos/event_groups.h"
